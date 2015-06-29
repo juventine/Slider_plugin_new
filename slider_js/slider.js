@@ -30,40 +30,41 @@ function Slider(options) {
 	var delta;                         // current delta of shift ( mouseMove )
 	var isMouseDownEvent = false;      // flag: is mouseDownEvent now or no
 
-  this.init = function() {
-  	visibleImgs = options.visibleImgs;
-  	setStartConfiguration();
-  	getReferencesDomElements();
-  	countImages = options.countImages;
-  	initViewContainer();
-  	//************* registration of event-handlers
-  	window.addEventListener('resize', setSizeImagesInViewport); // event-handler for onresize event
-  	elementContainer.addEventListener('mousedown', handleMouseDownEvent); // event-handler for mousedown event
-    // onDragStart
-    elementContainer.ondragstart = function() {
-	    return false;
-	  }
-  	setEventHandlersForButtons();
-  }
-
-  function setStartConfiguration() {
-  	if ( options.visibleImgs) {
-		visibleImgs = options.visibleImgs;
-	  }
-
-  	if ( options.activeImageNumber != undefined ) {
-  		config.activeImageNumber = options.activeImageNumber;
+	this.init = function() {
+	  	visibleImgs = options.visibleImgs;
+	  	setStartConfiguration();
+	  	getReferencesDomElements();
+	  	countImages = options.countImages;
+	  	initViewContainer();
+	  	//************* registration of event-handlers
+	  	window.addEventListener('resize', setSizeImagesInViewport); // event-handler for onresize event
+	  	elementContainer.addEventListener('mousedown', handleMouseDownEvent); // event-handler for mousedown event
+	        // onDragStart
+	        elementContainer.ondragstart = function() {
+		    return false;
 		}
-  }
+	  	setEventHandlersForButtons();
+	}
 
-  function getReferencesDomElements() {
-  	elementContainer = document.getElementById('container');
-  	arrElemImages = document.getElementsByClassName('imagesContainer');
-  	arrBlockImage = document.getElementsByClassName('block_image');
-  	elementLeftButton = document.querySelector('.arrow.left');
-  	elementRightButton = document.querySelector('.arrow.right');
-  	elementButtons = document.getElementById('buttons');
-  }
+	function setStartConfiguration() {
+	  	
+	  	if ( options.visibleImgs) {
+			visibleImgs = options.visibleImgs;
+		}
+	
+	  	if ( options.activeImageNumber != undefined ) {
+	  		config.activeImageNumber = options.activeImageNumber;
+		}
+	}
+
+	function getReferencesDomElements() {
+	  	elementContainer = document.getElementById('container');
+	  	arrElemImages = document.getElementsByClassName('imagesContainer');
+	  	arrBlockImage = document.getElementsByClassName('block_image');
+	  	elementLeftButton = document.querySelector('.arrow.left');
+	  	elementRightButton = document.querySelector('.arrow.right');
+	  	elementButtons = document.getElementById('buttons');
+	 }
 
  	function initViewContainer() {
  		hideContainer();
@@ -90,23 +91,23 @@ function Slider(options) {
 	  elementContainer.hidden = 'true';
 	}
 
-  function checkDeviceType() {
+	function checkDeviceType() {
+	
+	    if (window.outerWidth < 481) {
+			return 'Mobile';
+	    }
+	
+	    if (window.outerWidth > 481 && window.outerWidth < 1025) {
+	    	return 'Tablet';
+	    }
+	
+	    if (window.outerWidth > 1025) {
+	    	return 'Desctop';
+	    }
+	 }
 
-    if (window.outerWidth < 481) {
-		return 'Mobile';
-    }
 
-    if (window.outerWidth > 481 && window.outerWidth < 1025) {
-    	return 'Tablet';
-    }
-
-    if (window.outerWidth > 1025) {
-    	return 'Desctop';
-    }
-  }
-
-
-  function checkVisibleImages() {
+  	function checkVisibleImages() {
 		switch( deviceType ) {
 			case 'Mobile':
 				config.visibleImgs = 1; // for mobiles maximum one image in viewport
@@ -147,7 +148,7 @@ function Slider(options) {
 
 		// define image width in viewport
 		// consider left padding ( 3 px ) of block of images
-		var imageWidthDyn = ( window.innerWidth - 3 * ( config.visibleImgs - 1 ) - 6 ) /	config.visibleImgs; // size of image in viewport
+		var imageWidthDyn = ( window.innerWidth - 3 * ( config.visibleImgs - 1 ) - 6 ) /config.visibleImgs; // size of image in viewport
 
 		// set each image corresponding style of width and height
 		for( var i = 0; i < arrElemImages.length; i++ ) {
@@ -173,16 +174,16 @@ function Slider(options) {
 	}
 
 	function setSizeImagesInViewport() {
-		/*
+	/*
   	For various kind of devices we need to show corresponding maximum number of images in viewport.
   	Criterion is the width of screen of device
 
   	1) Size of Viewport for tablets is from 481 to 1025px. For tablets maximum images in viewport === 3
   	2) Size of Viewport for mobiles is < 481px ( width of mobile devices < 480 px). For mobiles maximum images in viewport === 1
   	3) Size of Viewport for desctops take >1025px.
-    */
-    deviceType = checkDeviceType(); // type of the device
-    checkVisibleImages();
+    	*/
+        	deviceType = checkDeviceType(); // type of the device
+    		checkVisibleImages();
 		formImageSize();
 		setButtonsPosition();
 	}
@@ -207,49 +208,51 @@ function Slider(options) {
 
 	this.shiftContainer = function(e) {
 		var target = e.target;
-	  var shiftMode = target.getAttribute('data-action');
-  	if (isDisabled) {
+	  	var shiftMode = target.getAttribute('data-action');
+  		
+  		if (isDisabled) {
     		isDisabled = false;
-    	if (checkContainer(shiftMode)) {
-    		rebuildDOMContainer(shiftMode);
-    }
-    	var oldLeftStyle = elementContainer.getBoundingClientRect().left;
-    	shiftContainerSmoothly(shiftMode, oldLeftStyle, shiftPixels);
-			setVisibleImages(shiftMode);
+    			if (checkContainer(shiftMode)) {
+    			rebuildDOMContainer(shiftMode);
+    		}
+    		var oldLeftStyle = elementContainer.getBoundingClientRect().left;
+    		shiftContainerSmoothly(shiftMode, oldLeftStyle, shiftPixels);
+		setVisibleImages(shiftMode);
 		}
 	}
 
 	function shiftContainerSmoothly(shiftMode, oldLeftStyle, shiftPixels){
-		// define number of intervals. shift in one interval mustn't be > 10 px
-  	var numberIntervals = Math.ceil( shiftPixels / 10 ); // 10 -- pixels in one interval
-  	var shiftInterval = shiftPixels / numberIntervals; // value of shift in one interval ( in pixels )
-  	if( shiftMode == 'shiftLeft' ) {
-  		var newLeftStyle = oldLeftStyle - shiftPixels;
-  		var shiftSize = oldLeftStyle - shiftInterval; // start shift of the container
-  	}
-  	else {
-  		var newLeftStyle = oldLeftStyle + shiftPixels;
-  		var shiftSize = oldLeftStyle + shiftInterval; // start shift of the container
-  	}
-
-		var count = 0; // count of calling function timerShift
-		// function for "fluent" shift
-		var shiftTimer = setInterval( function() {
-			count++;
-			elementContainer.style.left = shiftSize + 'px';
-
-			if( shiftMode == 'shiftLeft' ) {
-				shiftSize -= shiftInterval;
-			}
-			else {
-				shiftSize += shiftInterval;
-			}
-		// check if it's end of shift of container
-			if ( count == numberIntervals ) {
-				clearInterval( shiftTimer );
-				isDisabled = true;
-			}
-		} , 15);
+	// define number of intervals. shift in one interval mustn't be > 10 px
+	  	var numberIntervals = Math.ceil( shiftPixels / 10 ); // 10 -- pixels in one interval
+	  	var shiftInterval = shiftPixels / numberIntervals; // value of shift in one interval ( in pixels )
+	  	
+	  	if( shiftMode == 'shiftLeft' ) {
+	  		var newLeftStyle = oldLeftStyle - shiftPixels;
+	  		var shiftSize = oldLeftStyle - shiftInterval; // start shift of the container
+	  	}
+	  	else {
+	  		var newLeftStyle = oldLeftStyle + shiftPixels;
+	  		var shiftSize = oldLeftStyle + shiftInterval; // start shift of the container
+	  	}
+	
+			var count = 0; // count of calling function timerShift
+			// function for "fluent" shift
+			var shiftTimer = setInterval( function() {
+				count++;
+				elementContainer.style.left = shiftSize + 'px';
+	
+				if( shiftMode == 'shiftLeft' ) {
+					shiftSize -= shiftInterval;
+				}
+				else {
+					shiftSize += shiftInterval;
+				}
+			// check if it's end of shift of container
+				if ( count == numberIntervals ) {
+					clearInterval( shiftTimer );
+					isDisabled = true;
+				}
+			} , 15);
 	}
 
 
@@ -291,17 +294,17 @@ function Slider(options) {
 				//************* shift container to the right*******************************************
 				elementContainer.style.left = newLeftStyle + 'px';
 				//*************************************************************************************
-      	elementContainer.appendChild(firstBlockImageElement);
-      	break;
-  		case 'shiftRight':
-  			var lastBlockImageElement = elementContainer.removeChild(arrBlockImage[arrBlockImage.length - 1]);//remove last image from container
+      				elementContainer.appendChild(firstBlockImageElement);
+      				break;
+  			case 'shiftRight':
+  				var lastBlockImageElement = elementContainer.removeChild(arrBlockImage[arrBlockImage.length - 1]);//remove last image from container
 		//************ shift container to the right *************************************
 				var oldLeftStyle = elementContainer.getBoundingClientRect().left;
 				var newLeftStyle = oldLeftStyle - shiftPixels;
 				elementContainer.style.left = newLeftStyle + 'px';
-		//*******************************************************************************
-  			elementContainer.insertBefore(lastBlockImageElement, arrBlockImage[0]); //
-  			break;
+		//************* insert element in the beggining of container******************************************************************
+  				elementContainer.insertBefore(lastBlockImageElement, arrBlockImage[0]); //
+  				break;
     	}
 	};
 
@@ -348,70 +351,70 @@ function Slider(options) {
 						arrVisibleImgs[i] = +elementImage.getAttribute('data-number');
 						return true;
 					}
-			  }
-	  }
+			  	}
+	  	}
 	}
 
-  function handleMouseDownEvent(e) {
-  	if (isMouseDownEvent != true) {
-  	isMouseDownEvent = true;
-  	var startContainerPos = elementContainer.getBoundingClientRect().left;
-  	var startCoordinateX = e.clientX;
-  	// shiftMode: leftShift or rightShift
-  	var shiftMode;
-  	arrMouseMoveCoordinates.push(startCoordinateX);
+	function handleMouseDownEvent(e) {
+	  	if (isMouseDownEvent != true) {
+	  	isMouseDownEvent = true;
+	  	var startContainerPos = elementContainer.getBoundingClientRect().left;
+	  	var startCoordinateX = e.clientX;
+	  	// shiftMode: leftShift or rightShift
+	  	var shiftMode;
+	  	arrMouseMoveCoordinates.push(startCoordinateX);
+	
+	  	//******** adding events*******************************************
+	  	document.addEventListener('mousemove', handleMouseMoveEvent);
+	  	}
+	
+	  	document.addEventListener('mouseup', handleMouseUpEvent);
+	  	//*****************************************************************
+	  	function handleMouseMoveEvent(e) {
+	 			arrMouseMoveCoordinates.push(e.clientX);
+	 			var containerOffsetLeft = checkRebuildDOMContainer(e);
+	
+				if ( containerOffsetLeft != undefined ) {
+					startContainerPos = containerOffsetLeft;
+					startCoordinateX = e.clientX;
+			  }
+	 				moveContainer();
+	  	}
 
-  	//******** adding events*******************************************
-  	document.addEventListener('mousemove', handleMouseMoveEvent);
-  	}
+	  	function handleMouseUpEvent(e){
+	  		moveSmoothlyContainer();
+	  		setTimeout(setVisibleImagesMouseUp, 500);
+		  	document.removeEventListener('mousemove', handleMouseMoveEvent);
+		  	document.removeEventListener('mouseup', handleMouseUpEvent);
+		  	isMouseDownEvent = false;
+	  	}
 
-  	document.addEventListener('mouseup', handleMouseUpEvent);
-  	//*****************************************************************
-  	function handleMouseMoveEvent(e) {
- 			arrMouseMoveCoordinates.push(e.clientX);
- 			var containerOffsetLeft = checkRebuildDOMContainer(e);
+	  	function moveContainer() {
+	  		var newLeftStyle = startContainerPos + arrMouseMoveCoordinates[arrMouseMoveCoordinates.length - 1] - startCoordinateX;
+	  		elementContainer.style.left = newLeftStyle + 'px';
+	  	}
 
-			if ( containerOffsetLeft != undefined ) {
-				startContainerPos = containerOffsetLeft;
-				startCoordinateX = e.clientX;
-		  }
- 				moveContainer();
-  	}
-
-  	function handleMouseUpEvent(e){
-  		moveSmoothlyContainer();
-  		setTimeout(setVisibleImagesMouseUp, 500);
-	  	document.removeEventListener('mousemove', handleMouseMoveEvent);
-	  	document.removeEventListener('mouseup', handleMouseUpEvent);
-	  	isMouseDownEvent = false;
-  	}
-
-  	function moveContainer() {
-  		var newLeftStyle = startContainerPos + arrMouseMoveCoordinates[arrMouseMoveCoordinates.length - 1] - startCoordinateX;
-  		elementContainer.style.left = newLeftStyle + 'px';
-  	}
-
-  	function checkRebuildDOMContainer(e){
-  		var containerOffsetLeft = elementContainer.getBoundingClientRect().left;
-  		var previousCoordinateX;
-  		// position of container with images relatively right side of window
-  		var containerOffsetRight = containerImagesWidth - (Math.abs(containerOffsetLeft) + window.innerWidth);
-  		// define delta of moving of container with images
-  		if (arrMouseMoveCoordinates.length <= 2) {
-  			previousCoordinateX = startCoordinateX;
-  		}
-  		else {
-  			previousCoordinateX = arrMouseMoveCoordinates[arrMouseMoveCoordinates.length - 2];
-  		}
-
-  		delta = previousCoordinateX - e.clientX;
-
-  		if (delta < 0) {
-  			shiftMode = 'shiftRight';
-  		}
-  		else if (delta > 0) {
-  			shiftMode = 'shiftLeft';
-  		}
+	  	function checkRebuildDOMContainer(e){
+	  		var containerOffsetLeft = elementContainer.getBoundingClientRect().left;
+	  		var previousCoordinateX;
+	  		// position of container with images relatively right side of window
+	  		var containerOffsetRight = containerImagesWidth - (Math.abs(containerOffsetLeft) + window.innerWidth);
+	  		// define delta of moving of container with images
+	  		if (arrMouseMoveCoordinates.length <= 2) {
+	  			previousCoordinateX = startCoordinateX;
+	  		}
+	  		else {
+	  			previousCoordinateX = arrMouseMoveCoordinates[arrMouseMoveCoordinates.length - 2];
+	  		}
+	
+	  		delta = previousCoordinateX - e.clientX;
+	
+	  		if (delta < 0) {
+	  			shiftMode = 'shiftRight';
+	  		}
+	  		else if (delta > 0) {
+	  			shiftMode = 'shiftLeft';
+	  		}
 
   		//******************* Check if we need to relocate images in DOM **********************//
   		/*There are we have four various situation:
@@ -456,43 +459,43 @@ function Slider(options) {
 			}
 		}
 
-  	function moveSmoothlyContainer(){
-  		var shiftSize; // size in pixels which we need to shift "smoothly" container with images
-
-  		if (shiftMode == undefined) {
-  			if (delta < 0) {
-  				shiftMode = 'shiftRight';
-  			}
-  			else if (delta > 0) {
-  				shiftMode = 'shiftLeft';
-  			}
-  		}
+	  	function moveSmoothlyContainer(){
+	  		var shiftSize; // size in pixels which we need to shift "smoothly" container with images
+	
+	  		if (shiftMode == undefined) {
+	  			if (delta < 0) {
+	  				shiftMode = 'shiftRight';
+	  			}
+	  			else if (delta > 0) {
+	  				shiftMode = 'shiftLeft';
+	  			}
+	  		}
 
 		//******** Define size in pixels which we need to shift "smoothly" container with images ******
-  		var containerOffsetLeft = elementContainer.getBoundingClientRect().left;
-
-  		if (!(Math.abs(containerOffsetLeft) % shiftPixels)) {
-  			return true; // if we don't have any reasons to shift our container
+	  		var containerOffsetLeft = elementContainer.getBoundingClientRect().left;
+	
+	  		if (!(Math.abs(containerOffsetLeft) % shiftPixels)) {
+	  			return true; // if we don't have any reasons to shift our container
+	  		}
+	
+	  		if (Math.abs(containerOffsetLeft) > shiftPixels) {
+	  			shiftSize = (Math.abs(containerOffsetLeft) % shiftPixels);
+	  		}
+	  		else {
+	  			shiftSize = Math.abs(containerOffsetLeft);
+	  		}
+	
+	  		if (shiftMode == 'shiftLeft') {
+	  			shiftSize = shiftPixels - shiftSize;
+	  		}
+	
+	  		shiftContainerSmoothly(shiftMode, containerOffsetLeft, shiftSize);
+	  		//clear array with coordinates of moving container with images
+	  		arrMouseMoveCoordinates.length = 0;
   		}
-
-  		if (Math.abs(containerOffsetLeft) > shiftPixels) {
-  			shiftSize = (Math.abs(containerOffsetLeft) % shiftPixels);
-  		}
-  		else {
-  			shiftSize = Math.abs(containerOffsetLeft);
-  		}
-
-  		if (shiftMode == 'shiftLeft') {
-  			shiftSize = shiftPixels - shiftSize;
-  		}
-
-  		shiftContainerSmoothly(shiftMode, containerOffsetLeft, shiftSize);
-  		//clear array with coordinates of moving container with images
-  		arrMouseMoveCoordinates.length = 0;
   	}
-  }
 
-  function setVisibleImagesMouseUp() {
+  	function setVisibleImagesMouseUp() {
 		var containerOffsetLeft = elementContainer.getBoundingClientRect().left;
 		// calculate number of images which are located outside viewport on the left side
 		var imagesNumberLeft =  Math.round(Math.abs(containerOffsetLeft / shiftPixels));
@@ -505,7 +508,7 @@ function Slider(options) {
 		}
 	}
 
-  this.init(); // when create object of class, we initialize
+  	this.init(); // when create object of class, we initialize
 
 	this.destroy = function() {
 		window.removeEventListener('resize', setSizeImagesInViewport);
